@@ -17,7 +17,7 @@ def ba_prune(orig_col, orig_en, cur_color, other_color, board, max_depth=3, cur_
             ret_val = min(ba_prune(orig_col, orig_en, cur_color, other_color, copied_board, max_depth, cur_depth+1, n_loc) for n_loc in copied_board.open)
             return ret_val
     # give theoretical points for further calculating assuming paradrop then check for neighbors for blitz (we're checking every spots paradrop)
-    war_game_main.__paradrop(copied_board, next_loc, cur_color)
+    __paradrop(copied_board, next_loc, cur_color)
     # now blitz
     height = len(copied_board.board)
     width = len(copied_board.board[0])
@@ -55,4 +55,8 @@ def ba_prune(orig_col, orig_en, cur_color, other_color, board, max_depth=3, cur_
             beta[1] = next_loc
             return beta
 
-
+def __paradrop(self, loc, team):
+        self.open.remove(loc)
+        self.score[team] += self.board[loc[0]][loc[1]]['value']
+        self.board[loc[0]][loc[1]]['team'] = team
+        return
