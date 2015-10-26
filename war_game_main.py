@@ -96,6 +96,8 @@ def minimax(board, team, opponent, max_player, depth, loc = None):
 
     # Depth reached/No more spots
     if (len(minimax_board.open) == 0) or (depth <= 0):
+        max_team = team if max_player else opponent
+        #return [(minimax_board.score[max_team] - minimax_board.score[opponent]), loc]
         return [(minimax_board.score[team] if max_player else minimax_board.score[opponent]), loc]
 
     # Recurse minimax where heuristic is worst case score for max_player
@@ -109,10 +111,10 @@ def minimax(board, team, opponent, max_player, depth, loc = None):
         return retval
 
 def simulate(game, runmode):
+    expanded_nodes = {'blue': [], 'green':[]}
+    current_team = 'blue'
+    opponent_team = 'green'
     if(runmode == 'MvM'):
-        expanded_nodes = {'blue': [], 'green':[]}
-        current_team = 'blue'
-        opponent_team = 'green'
         max_player = True
         total_nodes = 0
 
@@ -132,11 +134,11 @@ def simulate(game, runmode):
             # Next turn
             current_team, opponent_team = opponent_team, current_team
 
-        print("green:", expanded_nodes['green'])
-        print("blue:", expanded_nodes['blue'])
-        print(game.score)
-        print(game.board)
-        print(total_nodes)
+    print('green:', expanded_nodes['green'])
+    print('blue:', expanded_nodes['blue'])
+    print(game.score)
+    for row in game.board: print(row)
+    print(total_nodes)
     return
 
 def main():
