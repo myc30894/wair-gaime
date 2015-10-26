@@ -126,7 +126,7 @@ def simulate(game, runmode):
             # Get minimax decision and capture spot (blitz if possible, drop otherwise)
             result = minimax(game, current_team, opponent_team, max_player, 3)
             game._make_move(result[1], 1, current_team, max_player)
-
+            print (result[1])
             # Expanded nodes
             print(minimax.nodes, current_team)
             total_nodes += minimax.nodes
@@ -134,11 +134,24 @@ def simulate(game, runmode):
 
             # Next turn
             current_team, opponent_team = opponent_team, current_team
+            
     if (runmode == 'ABvAB'):
-        current_team = 'blue'
-        opponent_team = 'green'
-        result = BAprune.ba_prune(current_team,opponent_team,current_team,opponent_team,game)
-        print(result[1])
+        total_nodes = 0
+        while(game.open):
+            abnodes = 0
+
+            # Get minimax decision and capture spot (blitz if possible, drop otherwise)
+            result = BAprune.ba_prune(current_team,opponent_team,current_team,opponent_team,game)
+            game._make_move(result[1], 1, current_team, opponent_team)
+            abnodes = result[2]
+            # Expanded nodes
+            print(abnodes, current_team, result[1])
+            total_nodes += abnodes
+            expanded_nodes[current_team].append(abnodes) 
+
+            # Next turn
+            current_team, opponent_team = opponent_team, current_team
+
 
     print('green:', expanded_nodes['green'])
     print('blue:', expanded_nodes['blue'])
