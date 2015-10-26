@@ -2,6 +2,7 @@ from copy import deepcopy
 import argparse
 import logging
 import BAprune
+import sys
 from collections import Counter
 
 
@@ -81,35 +82,37 @@ class WarGame:
         return
 
 def minimax(board, team, opponent, max_player, depth, loc = None):
-    minimax_board = deepcopy(board)
-
-    # Check all terminals
-    if depth == 3:
-        if max_player:
-            return max(minimax(minimax_board, team, opponent, max_player, depth-1, unoccupied) for unoccupied in minimax_board.open)
-        else:
-            return min(minimax(minimax_board, team, opponent, max_player, depth-1, unoccupied) for unoccupied in minimax_board.open)
-   
-    minimax.nodes += 1
-
-    # Attempt Blitz
-    minimax_board._make_move(loc, 1, team, max_player)
-
     # Depth reached/No more spots
-    if (len(minimax_board.open) == 0) or (depth <= 0):
-        max_team = team if max_player else opponent
-        #return [(minimax_board.score[max_team] - minimax_board.score[opponent]), loc]
-        return [(minimax_board.score[team] if max_player else minimax_board.score[opponent]), loc]
+    if depth == 0 or (len(board.open) == 0):
+        return (board.score[team] if max_player else board.score[opponent], loc)
 
-    # Recurse minimax where heuristic is worst case score for max_player
-    if max_player:
-        retval = min(minimax(minimax_board, opponent, team, not max_player, depth-1, unoccupied) for unoccupied in minimax_board.open)
-        retval[1] = loc
-        return retval
-    else:
-        retval = max(minimax(minimax_board, opponent, team, not max_player, depth-1, unoccupied) for unoccupied in minimax_board.open)
-        retval[1] = loc
-        return retval
+    max_value = -sys.maxint - 1
+    min_value = sys.maxint
+    best_loc = (-1,-1)
+
+    # Test every open spot
+    for unoccupied in board.open:
+
+        # Make deepcopy to prevent different paths changing game board
+        copied_board = deepcopy(board)
+        minimax.nodes += 1
+
+        # Attempt blitz
+        copied_board._make_move(unoccupied, 1, team, max_player)
+
+        # Recurse to get best move
+        move_score = minimax(copied_board, opponent, team, not max_player, depth-1, unoccupied)
+
+        if max_player:
+            if move_score[0] > max_value:
+                max_value = move_score[0]
+                best_loc = unoccupied
+        else:
+            if move_score[0] < min_value:
+                min_value = move_score[0]
+                best_loc = unoccupied
+
+    return (max_value if max_player else min_value, best_loc)
 
 def simulate(game, runmode):
     expanded_nodes = {'blue': [], 'green':[]}
