@@ -134,19 +134,18 @@ def simulate(game, runmode):
 
             # Next turn
             current_team, opponent_team = opponent_team, current_team
-
-
-    print('green:', expanded_nodes['green'])
-    print('blue:', expanded_nodes['blue'])
-    print(game.score)
-    for row in game.board: print(row)
-    print(total_nodes)
-
     if (runmode == 'ABvAB'):
         current_team = 'blue'
         opponent_team = 'green'
         result = BAprune.ba_prune(current_team,opponent_team,current_team,opponent_team,game)
         print(result[1])
+
+  #  print('green:', expanded_nodes['green'])
+  #  print('blue:', expanded_nodes['blue'])
+  #  print(game.score)
+  #  for row in game.board: print(row)
+  #  print(total_nodes)
+
 
     return
 
