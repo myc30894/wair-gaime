@@ -34,6 +34,7 @@ class WarGame:
         except:
             pass
 
+        # Check conquer and change scores respectively
         loc_team = self.board[loc[0]][loc[1]]['team']
         if loc_team and loc_team!= team:
             self.score[loc_team] -= self.board[loc[0]][loc[1]]['value']
@@ -46,6 +47,7 @@ class WarGame:
     def __conquer_neighbors(self, loc, team, opponent, max_player):
         neighbors = [(loc[0]+1, loc[1]), (loc[0]-1, loc[1]), (loc[0], loc[1]+1), (loc[0], loc[1]-1)]
 
+        # Conquer and capture all valid enemy neighbors and spots
         for neighbor in neighbors:
             row = neighbor[0]
             col = neighbor[1]
@@ -64,14 +66,14 @@ class WarGame:
         else:
             opponent = 'blue'
 
+        # Capture spot (basically paradrop) then attempt to blitz
         self.__capture(loc, team)
-
         self.__conquer_neighbors(loc, team, opponent, max_player)      
 
         return
 
     def _make_move(self, loc, mode, team, max_player):
-        if mode == 0:
+        if mode == 0: 
             self.__capture(loc, team)
         elif mode == 1:
             self.__death_blitz(loc, team, max_player)
@@ -80,20 +82,23 @@ class WarGame:
 def minimax(board, team, opponent, max_player, depth, loc = None):
     minimax_board = deepcopy(board)
 
+    # Check all terminals
     if depth == 3:
         if max_player:
             return max(minimax(minimax_board, team, opponent, max_player, depth-1, unoccupied) for unoccupied in minimax_board.open)
         else:
             return min(minimax(minimax_board, team, opponent, max_player, depth-1, unoccupied) for unoccupied in minimax_board.open)
    
-    # Attempt Blitz
     minimax.nodes += 1
 
+    # Attempt Blitz
     minimax_board._make_move(loc, 1, team, max_player)
 
+    # Depth reached/No more spots
     if (len(minimax_board.open) == 0) or (depth <= 0):
         return [(minimax_board.score[team] if max_player else minimax_board.score[opponent]), loc]
 
+    # Recurse minimax where heuristic is worst case score for max_player
     if max_player:
         retval = min(minimax(minimax_board, opponent, team, not max_player, depth-1, unoccupied) for unoccupied in minimax_board.open)
         retval[1] = loc
@@ -110,14 +115,23 @@ def simulate(game, runmode):
         opponent_team = 'green'
         max_player = True
         total_nodes = 0
+
+        # Run until all spots are captured
         while(game.open):
             minimax.nodes = 0
+
+            # Get minimax decision and capture spot (blitz if possible, drop otherwise)
             result = minimax(game, current_team, opponent_team, max_player, 3)
             game._make_move(result[1], 1, current_team, max_player)
+
+            # Expanded nodes
             print(minimax.nodes, current_team)
             total_nodes += minimax.nodes
             expanded_nodes[current_team].append(minimax.nodes) 
+
+            # Next turn
             current_team, opponent_team = opponent_team, current_team
+
         print("green:", expanded_nodes['green'])
         print("blue:", expanded_nodes['blue'])
         print(game.score)
