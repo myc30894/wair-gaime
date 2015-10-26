@@ -4,9 +4,9 @@ import war_game_main
 def ba_prune(orig_col, orig_en, cur_color, other_color, board, max_depth=3, cur_depth = 0, next_loc = None, alpha = [-100000, None], beta = [100000, None]):
     # types: string, string, string, string, class, int, int, array[2], array[2], array [2]
     # goal is to keep going until cur_depth is greater than max depth and then return location after pruning
-    global nodes_searched = 0
+
     copied_board = deepcopy(board)
-    nodes_searched += 1
+    nodes_searched = 1
     if cur_depth == 0:
         nodes_searched = 1
         # team to go first is blue so it will be the "max"
@@ -40,17 +40,17 @@ def ba_prune(orig_col, orig_en, cur_color, other_color, board, max_depth=3, cur_
     else:
         if cur_color != orig_col:
             for next in copied_board.open:
-                alpha = max(ba_prune(orig_col, orig_en, cur_color, other_color, copied_board, max_depth, cur_depth+1, next, alpha, beta))
-                if beta[0] <= alpha[0]:
-                    #prune
+                alpha = max(alpha,ba_prune(orig_col, orig_en, cur_color, other_color, copied_board, max_depth, cur_depth+1, next, alpha, beta))
+                if beta <= alpha:
+                    # prune
                     break
             alpha[1] = next_loc
             return alpha
         else:
             for next in copied_board.open:
-                beta = min(ba_prune(orig_col, orig_en, cur_color, other_color, copied_board, max_depth, cur_depth+1, next, alpha, beta))
-                if beta[0] <= alpha[0]:
-                    #prune
+                beta = min(beta,ba_prune(orig_col, orig_en, cur_color, other_color, copied_board, max_depth, cur_depth+1, next, alpha, beta))
+                if beta <= alpha:
+                    # prune
                     break
             beta[1] = next_loc
             return beta
